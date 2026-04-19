@@ -118,4 +118,8 @@ sudo systemctl enable systemd-zram-setup@zram0
 sudo btrfs filesystem mkswapfile --size 16g /swap/swapfile
 sudo swapon /swap/swapfile
 
+# Performance
+sudo pacman -S --noconfirm thermald ananicy-cpp preload
+sudo systemctl enable thermald ananicy-cpp preload fstrim.timer
+
 echo "✅ All instal! Reboot system: reboot"
