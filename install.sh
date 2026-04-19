@@ -100,4 +100,22 @@ docker run -d \
   -v portainer_data:/data \
   portainer/portainer-ce:latest
 
-echo "✅ Всё установлено! Перезагрузись: reboot"
+# Memory optimization
+sudo pacman -S --noconfirm zram-generator earlyoom
+sudo systemctl enable earlyoom
+echo 'vm.swappiness=80' | sudo tee /etc/sysctl.d/99-swappiness.conf
+
+# Zram config
+sudo bash -c 'cat > /etc/systemd/zram-generator.conf << EOF
+[zram0]
+zram-size = ram / 2
+compression-algorithm = zstd
+EOF'
+sudo systemctl daemon-reload
+sudo systemctl enable systemd-zram-setup@zram0
+
+# Swap 16GB btrfs
+sudo btrfs filesystem mkswapfile --size 16g /swap/swapfile
+sudo swapon /swap/swapfile
+
+echo "✅ All instal! Reboot system: reboot"
