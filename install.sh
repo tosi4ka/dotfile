@@ -15,7 +15,7 @@ echo ""
 # ============================================================
 # 1. SYSTEM PACKAGES
 # ============================================================
-echo "=== [1/10] Installing system packages ==="
+echo "=== [1/11] Installing system packages ==="
 sudo pacman -S --noconfirm \
     git \
     go \
@@ -52,12 +52,13 @@ sudo pacman -S --noconfirm \
     earlyoom \
     profile-sync-daemon \
     xdotool \
+    cpupower \
     brother-hll2400dwe-cups 2>/dev/null || true
 
 # ============================================================
 # 2. AUR PACKAGES
 # ============================================================
-echo "=== [2/10] Installing AUR packages ==="
+echo "=== [2/11] Installing AUR packages ==="
 yay -S --noconfirm \
     visual-studio-code-bin \
     google-chrome \
@@ -74,7 +75,7 @@ yay -S --noconfirm \
 # ============================================================
 # 3. SERVICES
 # ============================================================
-echo "=== [3/10] Configuring services ==="
+echo "=== [3/11] Configuring services ==="
 sudo systemctl enable docker
 sudo systemctl enable tlp
 sudo systemctl enable cups
@@ -92,22 +93,25 @@ sudo usermod -aG plugdev $USER
 # ============================================================
 # 4. NVM + NODE
 # ============================================================
-echo "=== [4/10] Configuring NVM + Node.js ==="
+echo "=== [4/11] Configuring NVM + Node.js ==="
 echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 source ~/.bashrc
 nvm install --lts
 
 # ============================================================
-# 5. CCACHE
+# 5. CCACHE + ALIASES
 # ============================================================
-echo "=== [5/10] Configuring ccache ==="
+echo "=== [5/11] Configuring ccache and aliases ==="
 echo 'export PATH="/usr/lib/ccache/bin:$PATH"' >> ~/.bashrc
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+echo "alias power-save='sudo cpupower frequency-set -g powersave'" >> ~/.bashrc
+echo "alias power-performance='sudo cpupower frequency-set -g performance'" >> ~/.bashrc
 source ~/.bashrc
 
 # ============================================================
 # 6. DARKMAN (Auto dark/light theme)
 # ============================================================
-echo "=== [6/10] Configuring darkman (Paris location) ==="
+echo "=== [6/11] Configuring darkman (Paris location) ==="
 mkdir -p ~/.config/darkman
 cat > ~/.config/darkman/config.yaml << EOF
 lat: 48.8566
@@ -140,14 +144,44 @@ chmod +x ~/.local/share/dark-mode.d/xfce.sh
 chmod +x ~/.local/share/light-mode.d/xfce.sh
 
 # ============================================================
-# 7. MEMORY OPTIMIZATION
+# 7. POWER MODE SCRIPTS
 # ============================================================
-echo "=== [7/10] Memory optimization ==="
+echo "=== [7/11] Configuring power mode scripts ==="
+mkdir -p ~/.local/bin
 
-# Swappiness
+cat > ~/.local/bin/power-status.sh << 'EOF'
+#!/bin/bash
+gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+if [ "$gov" = "performance" ]; then
+    echo "<txt>⚡ Perf</txt>"
+else
+    echo "<txt>🔋 Save</txt>"
+fi
+EOF
+
+cat > ~/.local/bin/power-toggle.sh << 'EOF'
+#!/bin/bash
+gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+if [ "$gov" = "performance" ]; then
+    sudo cpupower frequency-set -g powersave
+else
+    sudo cpupower frequency-set -g performance
+fi
+EOF
+
+chmod +x ~/.local/bin/power-status.sh
+chmod +x ~/.local/bin/power-toggle.sh
+
+# sudo без пароля для cpupower
+echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/cpupower" | \
+    sudo tee /etc/sudoers.d/cpupower
+
+# ============================================================
+# 8. MEMORY OPTIMIZATION
+# ============================================================
+echo "=== [8/11] Memory optimization ==="
 echo 'vm.swappiness=80' | sudo tee /etc/sysctl.d/99-swappiness.conf
 
-# ZRAM
 sudo bash -c 'cat > /etc/systemd/zram-generator.conf << EOF
 [zram0]
 zram-size = ram / 2
@@ -156,33 +190,33 @@ EOF'
 sudo systemctl daemon-reload
 sudo systemctl enable systemd-zram-setup@zram0
 
-# Swap file on btrfs (16GB)
 sudo mkdir -p /swap
 sudo btrfs filesystem mkswapfile --size 16g /swap/swapfile 2>/dev/null || true
 sudo swapon /swap/swapfile 2>/dev/null || true
 
 # ============================================================
-# 8. NETWORK OPTIMIZATION (Wi-Fi 5GHz fix)
+# 9. NETWORK OPTIMIZATION (Wi-Fi 5GHz fix)
 # ============================================================
-echo "=== [8/10] Network optimization ==="
+echo "=== [9/11] Network optimization ==="
 sudo bash -c 'cat > /etc/NetworkManager/conf.d/wifi-powersave.conf << EOF
 [connection]
 wifi.powersave = 2
 EOF'
 
 # ============================================================
-# 9. PRINTER (Brother HL-L2400DWE)
+# 10. PRINTER (Brother HL-L2400DWE)
 # ============================================================
-echo "=== [9/10] Configuring Brother printer ==="
+echo "=== [10/11] Configuring Brother printer ==="
 sudo systemctl start cups
 sudo lpadmin -p Brother-HL-L2400DWE -E \
     -v "ipp://192.168.1.168/ipp/print" \
     -m everywhere 2>/dev/null || true
 
 # ============================================================
-# 10. PORTAINER (Docker GUI)
+# 11. PORTAINER (Docker GUI)
 # ============================================================
-echo "=== [10/10] Starting Portainer ==="
+echo "=== [11/11] Starting Portainer ==="
+sudo systemctl start docker
 docker volume create portainer_data 2>/dev/null || true
 docker run -d \
     -p 8000:8000 \
@@ -228,16 +262,23 @@ pkill winecfg 2>/dev/null || true
 echo "=== Profile sync daemon ==="
 systemctl --user enable psd
 
+source ~/.bashrc
+
 echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║           ✅ Setup Complete!             ║"
 echo "║                                          ║"
 echo "║  After reboot:                           ║"
-echo "║  • Run: winecfg (select Windows 10)      ║"
-echo "║  • Close Firefox before starting psd     ║"
+echo "║  • winecfg → select Windows 10           ║"
+echo "║  • Close Firefox → systemctl --user      ║"
+echo "║    start psd                             ║"
 echo "║  • Portainer: https://localhost:9443     ║"
 echo "║  • Timeshift: create first snapshot      ║"
+echo "║  • Panel: add Generic Monitor with       ║"
+echo "║    ~/.local/bin/power-status.sh          ║"
+echo "║  • Panel: add Launcher with              ║"
+echo "║    ~/.local/bin/power-toggle.sh          ║"
 echo "║                                          ║"
-echo "║  Reboot now: sudo reboot                 ║"
+echo "║  Reboot: sudo reboot                     ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
