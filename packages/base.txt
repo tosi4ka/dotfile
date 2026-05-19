@@ -28,6 +28,13 @@ wireplumber
 pamixer
 playerctl
 
+# Intel GPU drivers
+mesa
+vulkan-intel
+intel-media-driver
+libva-intel-driver
+linux-firmware
+
 # Screenshot / display
 grim
 slurp
