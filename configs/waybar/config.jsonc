@@ -82,7 +82,7 @@
 
 	"custom/battery": {
 		"exec": "~/.local/bin/waybar-battery.sh",
-		"interval": 1,
+		"interval": 30,
 		"signal": 10,
 		"return-type": "json",
 		"on-click": "~/.local/bin/waybar-battery-toggle-percent.sh",
@@ -99,7 +99,7 @@
 
 	"custom/volume": {
 		"exec": "~/.local/bin/waybar-volume.sh",
-		"interval": 2,
+		"interval": 30,
 		"signal": 9,
 		"return-type": "json",
 		"scroll-step": 5,
