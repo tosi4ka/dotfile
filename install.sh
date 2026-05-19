@@ -25,7 +25,8 @@ grep -v '^#' "$SCRIPT_DIR/packages/aur.txt" | grep -v '^$' | xargs yay -S --need
 
 # ── 4. hypr-utils ────────────────────────────────────────────
 echo "[4/7] Installing hypr-utils..."
-git clone https://github.com/tosi4ka/hypr-utils.git /tmp/hypr-utilscd /tmp/hypr-utils && ./install.sh
+git clone https://github.com/tosi4ka/hypr-utils.git /tmp/hypr-utils
+cd /tmp/hypr-utils && ./install.sh
 cd "$SCRIPT_DIR"
 
 # ── 5. Dotfiles ──────────────────────────────────────────────
@@ -35,6 +36,10 @@ for dir in "$SCRIPT_DIR"/configs/*/; do
     name=$(basename "$dir")
     cp -r "$dir" ~/.config/"$name"/
 done
+
+# Wallpapers directory — place your wallpapers here after install
+mkdir -p ~/Pictures/wallpapers
+echo "NOTE: Put your wallpapers in ~/Pictures/wallpapers/ and name the default wallpaper.jpg"
 
 # ── 6. Services ──────────────────────────────────────────────
 echo "[6/7] Enabling services..."

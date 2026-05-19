@@ -33,6 +33,10 @@ grim
 slurp
 wl-clipboard
 brightnessctl
+wtype
+
+# Keyboard / input
+python-evdev
 
 # Fonts
 ttf-jetbrains-mono-nerd
