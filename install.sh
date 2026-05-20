@@ -21,7 +21,7 @@ sudo pacman -S --needed --noconfirm - < "$SCRIPT_DIR/packages/base.txt"
 
 # ── 3. AUR packages ──────────────────────────────────────────
 echo "[3/7] Installing AUR packages..."
-grep -v '^#' "$SCRIPT_DIR/packages/aur.txt" | grep -v '^$' | xargs yay -S --needed --noconfirm
+grep -v '^#' "$SCRIPT_DIR/packages/base.txt" | grep -v '^$' | sudo pacman -S --needed --noconfirm -
 
 # ── 4. hypr-utils ────────────────────────────────────────────
 echo "[4/7] Installing hypr-utils..."
