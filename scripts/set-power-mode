@@ -1,0 +1,14 @@
+#!/bin/bash
+# set-power-mode <governor> <epp>
+if [[ $# -ne 2 ]]; then
+    echo "Usage: set-power-mode <governor> <epp>" >&2; exit 1
+fi
+GOV=$1; EPP=$2
+VALID_GOVS="performance powersave"
+VALID_EPPS="default performance balance_performance balance_power power"
+if ! echo "$VALID_GOVS" | grep -qw "$GOV"; then echo "Invalid governor: $GOV" >&2; exit 1; fi
+if ! echo "$VALID_EPPS" | grep -qw "$EPP"; then echo "Invalid EPP: $EPP" >&2; exit 1; fi
+for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq; do
+    echo "$GOV" > "$cpu/scaling_governor"
+    echo "$EPP" > "$cpu/energy_performance_preference"
+done

@@ -41,8 +41,14 @@ done
 mkdir -p ~/Pictures/wallpapers
 echo "NOTE: Put your wallpapers in ~/Pictures/wallpapers/ and name the default wallpaper.jpg"
 
-# ── 6. Services ──────────────────────────────────────────────
-echo "[6/7] Enabling services..."
+# ── 6. Power mode script ─────────────────────────────────────
+echo "[6/7] Installing power mode script..."
+sudo cp "$SCRIPT_DIR/scripts/set-power-mode" /usr/local/bin/set-power-mode
+sudo chmod +x /usr/local/bin/set-power-mode
+echo "$USER ALL=(ALL) NOPASSWD: /usr/local/bin/set-power-mode" | sudo tee /etc/sudoers.d/set-power-mode > /dev/null
+
+# ── 7. Services ──────────────────────────────────────────────
+echo "[7/7] Enabling services..."
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now docker
 sudo systemctl enable --now cups
@@ -56,7 +62,7 @@ sudo usermod -aG docker "$USER"
 sudo usermod -aG input "$USER"
 
 # ── 7. NVM + Node ────────────────────────────────────────────
-echo "[7/7] Setting up NVM..."
+echo "[8/8] Setting up NVM..."
 if ! grep -q 'init-nvm.sh' ~/.bashrc; then
     echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 fi
