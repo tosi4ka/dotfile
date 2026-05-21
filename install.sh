@@ -8,7 +8,7 @@ echo "╚═══════════════════════�
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── 1. AUR helper ────────────────────────────────────────────
-echo "[1/7] Checking AUR helper..."
+echo "[1/8] Checking AUR helper..."
 if ! command -v yay &>/dev/null; then
     git clone https://aur.archlinux.org/yay.git /tmp/yay
     cd /tmp/yay && makepkg -si --noconfirm
@@ -16,21 +16,21 @@ if ! command -v yay &>/dev/null; then
 fi
 
 # ── 2. Base packages ─────────────────────────────────────────
-echo "[2/7] Installing base packages..."
+echo "[2/8] Installing base packages..."
 grep -v '^#' "$SCRIPT_DIR/packages/base.txt" | grep -v '^$' | sudo pacman -S --needed --noconfirm -
 
 # ── 3. AUR packages ──────────────────────────────────────────
-echo "[3/7] Installing AUR packages..."
+echo "[3/8] Installing AUR packages..."
 grep -v '^#' "$SCRIPT_DIR/packages/aur.txt" | grep -v '^$' | yay -S --needed --noconfirm -
 
 # ── 4. hypr-utils ────────────────────────────────────────────
-echo "[4/7] Installing hypr-utils..."
+echo "[4/8] Installing hypr-utils..."
 git clone https://github.com/tosi4ka/hypr-utils.git /tmp/hypr-utils
 cd /tmp/hypr-utils && ./install.sh
 cd "$SCRIPT_DIR"
 
 # ── 5. Dotfiles ──────────────────────────────────────────────
-echo "[5/7] Copying configs..."
+echo "[5/8] Copying configs..."
 mkdir -p ~/.config
 for dir in "$SCRIPT_DIR"/configs/*/; do
     name=$(basename "$dir")
@@ -49,13 +49,14 @@ mkdir -p ~/SomeFiles/img
 echo "NOTE: Put your wallpapers in ~/SomeFiles/img/"
 
 # ── 6. Power mode script ─────────────────────────────────────
-echo "[6/7] Installing power mode script..."
+echo "[6/8] Installing power mode script..."
 sudo cp "$SCRIPT_DIR/scripts/set-power-mode" /usr/local/bin/set-power-mode
 sudo chmod +x /usr/local/bin/set-power-mode
-echo "$USER ALL=(ALL) NOPASSWD: /usr/local/bin/set-power-mode" | sudo tee /etc/sudoers.d/set-power-mode > /dev/null
+REAL_USER=$(logname 2>/dev/null || echo "$SUDO_USER")
+echo "$REAL_USER ALL=(ALL) NOPASSWD: /usr/local/bin/set-power-mode" | sudo tee /etc/sudoers.d/set-power-mode > /dev/null
 
 # ── 7. Services ──────────────────────────────────────────────
-echo "[7/7] Enabling services..."
+echo "[7/8] Enabling services..."
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now docker
 sudo systemctl enable --now cups
