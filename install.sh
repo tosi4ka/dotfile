@@ -55,8 +55,12 @@ sudo chmod +x /usr/local/bin/set-power-mode
 REAL_USER=$(logname 2>/dev/null || echo "$SUDO_USER")
 echo "$REAL_USER ALL=(ALL) NOPASSWD: /usr/local/bin/set-power-mode" | sudo tee /etc/sudoers.d/set-power-mode > /dev/null
 
-# ── 7. Power button / lid switch ─────────────────────────────
-echo "[7/8] Configuring power button and lid switch..."
+# ── 7. Autologin + power button / lid switch ─────────────────
+echo "[7/9] Configuring autologin..."
+sudo mkdir -p /etc/sddm.conf.d
+sudo cp "$SCRIPT_DIR/configs/sddm.conf.d/autologin.conf" /etc/sddm.conf.d/autologin.conf
+
+echo "[8/9] Configuring power button and lid switch..."
 sudo mkdir -p /etc/systemd/logind.conf.d
 cat <<EOF | sudo tee /etc/systemd/logind.conf.d/power-button.conf > /dev/null
 [Login]
@@ -68,7 +72,7 @@ EOF
 sudo systemctl restart systemd-logind
 
 # ── 8. Services ──────────────────────────────────────────────
-echo "[8/8] Enabling services..."
+echo "[9/9] Enabling services..."
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now docker
 sudo systemctl enable --now cups
@@ -82,7 +86,7 @@ sudo usermod -aG docker "$USER"
 sudo usermod -aG input "$USER"
 
 # ── 7. NVM + Node ────────────────────────────────────────────
-echo "[9/9] Setting up NVM..."
+echo "[10/10] Setting up NVM..."
 if ! grep -q 'init-nvm.sh' ~/.bashrc; then
     echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 fi
