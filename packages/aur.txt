@@ -1,6 +1,5 @@
 # AUR packages
 google-chrome
-libfprint-git
 papirus-folders-git
 preload
 visual-studio-code-bin

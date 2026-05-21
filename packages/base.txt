@@ -80,7 +80,6 @@ gnome-keyring
 libsecret
 cups
 avahi
-fprintd
 
 # Performance
 thermald
