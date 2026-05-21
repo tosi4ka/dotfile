@@ -55,8 +55,20 @@ sudo chmod +x /usr/local/bin/set-power-mode
 REAL_USER=$(logname 2>/dev/null || echo "$SUDO_USER")
 echo "$REAL_USER ALL=(ALL) NOPASSWD: /usr/local/bin/set-power-mode" | sudo tee /etc/sudoers.d/set-power-mode > /dev/null
 
-# ── 7. Services ──────────────────────────────────────────────
-echo "[7/8] Enabling services..."
+# ── 7. Power button / lid switch ─────────────────────────────
+echo "[7/8] Configuring power button and lid switch..."
+sudo mkdir -p /etc/systemd/logind.conf.d
+cat <<EOF | sudo tee /etc/systemd/logind.conf.d/power-button.conf > /dev/null
+[Login]
+HandlePowerKey=suspend
+HandleLidSwitch=suspend
+HandleLidSwitchExternalPower=suspend
+HandleLidSwitchDocked=suspend
+EOF
+sudo systemctl restart systemd-logind
+
+# ── 8. Services ──────────────────────────────────────────────
+echo "[8/8] Enabling services..."
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now docker
 sudo systemctl enable --now cups
@@ -70,7 +82,7 @@ sudo usermod -aG docker "$USER"
 sudo usermod -aG input "$USER"
 
 # ── 7. NVM + Node ────────────────────────────────────────────
-echo "[8/8] Setting up NVM..."
+echo "[9/9] Setting up NVM..."
 if ! grep -q 'init-nvm.sh' ~/.bashrc; then
     echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 fi

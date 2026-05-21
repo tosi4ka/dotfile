@@ -5,3 +5,4 @@ preload
 visual-studio-code-bin
 whitesur-gtk-theme
 whitesur-icon-theme-git
+hypridle-git
