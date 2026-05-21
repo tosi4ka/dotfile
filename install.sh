@@ -34,12 +34,19 @@ echo "[5/7] Copying configs..."
 mkdir -p ~/.config
 for dir in "$SCRIPT_DIR"/configs/*/; do
     name=$(basename "$dir")
+    [[ "$name" == "systemd" ]] && continue
     cp -r "$dir" ~/.config/"$name"/
 done
 
-# Wallpapers directory — place your wallpapers here after install
-mkdir -p ~/Pictures/wallpapers
-echo "NOTE: Put your wallpapers in ~/Pictures/wallpapers/ and name the default wallpaper.jpg"
+# Systemd user services
+mkdir -p ~/.config/systemd/user
+cp "$SCRIPT_DIR"/configs/systemd/user/*.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable char-picker
+
+# Wallpapers directory
+mkdir -p ~/SomeFiles/img
+echo "NOTE: Put your wallpapers in ~/SomeFiles/img/"
 
 # ── 6. Power mode script ─────────────────────────────────────
 echo "[6/7] Installing power mode script..."
